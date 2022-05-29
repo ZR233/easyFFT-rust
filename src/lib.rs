@@ -8,24 +8,39 @@ use std::ptr::null;
 use ndarray::{Array, Array1, ArrayBase, ArrayD, Dimension, RawData};
 use num::{Complex, Num};
 use num::complex::Complex32;
+use crate::bindings::FFTPlanFloat;
 
 
-pub struct  Plan<'b, T, D: Dimension> {
+
+
+pub struct Plan<'b, T, D: Dimension, P, C> {
     data_in: &'b mut Array<T, D>,
     data_out: &'b mut Array<T, D>,
     shape: Vec<i32>,
     number_batches: i32,
-    origin: Box<dyn Any>,
+    origin: Option<P>,
+    closer: Option<C>,
+}
+struct PlanCloserFloat{
+    ptr: FFTPlanFloat
+}
+impl Drop for PlanCloserFloat{
+    fn drop(&mut self) {
+        unsafe {
+            bindings::fft_close_plan(self.ptr);
+        }
+    }
 }
 
 
-impl <'b, D: Dimension> Plan<'b, Complex32, D>{
+
+impl <'b, D: Dimension> Plan<'b, Complex32, D, FFTPlanFloat, PlanCloserFloat>{
     pub fn new_complex_float(
         sign: bindings::FFT_SIGN,
         device: bindings::FFT_DEVICE,
         data_in: &'b mut Array<Complex32, D>,
         data_out: &'b mut Array<Complex32, D>,
-    )->Plan<'b, Complex32, D>{
+    )->Plan<'b, Complex32, D, FFTPlanFloat, PlanCloserFloat>{
 
         unsafe {
             let mut plan = Plan::new(
@@ -47,19 +62,33 @@ impl <'b, D: Dimension> Plan<'b, Complex32, D>{
                 &mut error as *mut i32,
             );
 
-            plan.origin = Box::new(plan_origin);
+            plan.origin = Some(plan_origin);
+            plan.closer = Some(PlanCloserFloat{
+                ptr: plan_origin.clone()
+            });
             plan
+        }
+    }
+
+    pub fn execute(&self){
+        unsafe {
+            let p = self.origin.unwrap();
+            let err = bindings::fft_execute(p);
         }
     }
 }
 
 
 
-impl<'b, T, D: Dimension> Plan<'b, T, D> {
+
+
+
+
+impl<'b, T, D: Dimension, P, C> Plan<'b, T, D, P, C> {
     fn new (
         data_in: &'b mut Array<T, D>,
         data_out: &'b mut Array<T, D>,
-    ) -> Plan<'b, T, D>{
+    ) -> Plan<'b, T, D, P, C>{
 
 
         let shape_nd = data_in.shape();
@@ -76,11 +105,10 @@ impl<'b, T, D: Dimension> Plan<'b, T, D> {
             data_out,
             shape,
             number_batches,
-            origin: Box::new(0i8),
+            origin: None,
+            closer:None,
         }
     }
-
-
 
 }
 
@@ -99,29 +127,49 @@ mod tests {
     use ndarray::prelude::*;
     #[test]
     fn it_works() {
-
-
-        let mut  a =
-          Array::<Complex32, _>::ones((2, 4));
-
-
-        let mut b =
-            Array::<Complex32, _>::ones((2, 4));
-
-        let plan = &mut Plan::new_complex_float(
-            FFT_SIGN_FFT_SIGN_FORWARD,
-            FFT_DEVICE_FFT_DEVICE_CPU,
-            &mut a,
-            &mut b,
-        );
+        let mut out1;
         {
-            for i in 0..4 {
-                plan.data_in[[0, i]] = Complex32::new(i as f32, -(i as f32));
+            let mut  a =
+                Array::<Complex32, _>::ones((2, 4));
+
+
+            let mut b =
+                Array::<Complex32, _>::ones((2, 4));
+            println!("1");
+            let plan = Plan::new_complex_float(
+                FFT_SIGN_FFT_SIGN_FORWARD,
+                FFT_DEVICE_FFT_DEVICE_CPU,
+                &mut a,
+                &mut b,
+            );
+            println!("2");
+            {
+                for i in 0..4 {
+                    plan.data_in[[0, i]] = Complex32::new(i as f32, -(i as f32));
+                }
+                for i in 0..4 {
+                    let t = (4+i) as f32;
+                    plan.data_in[[1, i]] = Complex32::new(-t, t);
+                }
             }
+
+            println!("3");
+            plan.execute();
+            println!("4");
+            let out = plan.data_out.clone(). into_raw_vec();
+
+            println!("{:?}", out.len());
+
+            out1 = plan.data_out.clone();
         }
 
-        let s = &plan.shape;
 
-        assert_eq!(4, 4);
+
+        assert_eq!(out1,  array![
+            [Complex32::new(6.0, -6.0), Complex32::new(0.0, 4.0), Complex32::new(-2.0, 2.0), Complex32::new(-4.0, 0.0)],
+            [Complex32::new(-22.0, 22.0), Complex32::new(0.0, -4.0), Complex32::new(2.0, -2.0), Complex32::new(4.0, 0.0)]
+        ]);
+
+
     }
 }
