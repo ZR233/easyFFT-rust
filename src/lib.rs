@@ -11,8 +11,6 @@ use num::complex::Complex32;
 use crate::bindings::FFTPlanFloat;
 
 
-
-
 pub struct Plan<'b, T, D: Dimension, P, C> {
     data_in: &'b mut Array<T, D>,
     data_out: &'b mut Array<T, D>,
@@ -77,11 +75,6 @@ impl <'b, D: Dimension> Plan<'b, Complex32, D, FFTPlanFloat, PlanCloserFloat>{
         }
     }
 }
-
-
-
-
-
 
 
 impl<'b, T, D: Dimension, P, C> Plan<'b, T, D, P, C> {

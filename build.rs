@@ -36,6 +36,21 @@ fn main(){
         .write_to_file(root.join("src").join("bindings.rs").display().to_string())
         .expect("Couldn't write bindings!");
 
+    let vars = env::vars();
+    for one in vars {
+        println!("cargo:warning={}:{}", one.0, one.1);
+    }
+
+    use cmake::Config;
+
+    let dst = Config::new("easyFFT")
+        .build();
+
+    println!("cargo:warning=CMAKE_DST:{}", dst.display());
+
+    println!("cargo:rustc-link-search=native={}", dst.join("bin").display());
+    println!("cargo:rustc-link-search=native={}", dst.join("lib").display());
+    println!("cargo:rustc-link-lib=static=easyFFT");
 
 
 }
