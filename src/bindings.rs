@@ -52,30 +52,103 @@ pub type uint_fast32_t = ::std::os::raw::c_uint;
 pub type uint_fast64_t = ::std::os::raw::c_ulonglong;
 pub type intmax_t = ::std::os::raw::c_longlong;
 pub type uintmax_t = ::std::os::raw::c_ulonglong;
-pub const FFT_ERROR_CODE_FFT_ERROR_CODE_OK: FFT_ERROR_CODE = 0;
-pub const FFT_ERROR_CODE_FFT_ERROR_CODE_IN_SIZE: FFT_ERROR_CODE = 1;
-pub const FFT_ERROR_CODE_FFT_ERROR_CODE_OUT_SIZE: FFT_ERROR_CODE = 2;
-pub const FFT_ERROR_CODE_FFT_ERROR_CODE_CL: FFT_ERROR_CODE = 3;
-pub const FFT_ERROR_CODE_FFT_ERROR_CODE_DIM_TOO_BIG: FFT_ERROR_CODE = 4;
-pub const FFT_ERROR_CODE_FFT_ERROR_CODE_NO_CL_DEVICE: FFT_ERROR_CODE = 5;
-pub const FFT_ERROR_CODE_FFT_ERROR_CODE_VKFFT: FFT_ERROR_CODE = 6;
+pub const FFT_ERROR_CODE_OK: FFT_ERROR_CODE = 0;
+pub const FFT_ERROR_CODE_IN_SIZE: FFT_ERROR_CODE = 1;
+pub const FFT_ERROR_CODE_OUT_SIZE: FFT_ERROR_CODE = 2;
+pub const FFT_ERROR_CODE_CL: FFT_ERROR_CODE = 3;
+pub const FFT_ERROR_CODE_DIM_TOO_BIG: FFT_ERROR_CODE = 4;
+pub const FFT_ERROR_CODE_NO_CL_DEVICE: FFT_ERROR_CODE = 5;
+pub const FFT_ERROR_CODE_VKFFT: FFT_ERROR_CODE = 6;
 pub type FFT_ERROR_CODE = ::std::os::raw::c_int;
-pub const FFT_SIGN_FFT_SIGN_FORWARD: FFT_SIGN = 0;
-pub const FFT_SIGN_FFT_SIGN_BACKWARD: FFT_SIGN = 1;
+pub const FFT_SIGN_FORWARD: FFT_SIGN = 0;
+pub const FFT_SIGN_BACKWARD: FFT_SIGN = 1;
 pub type FFT_SIGN = ::std::os::raw::c_int;
-pub const FFT_DEVICE_FFT_DEVICE_CPU: FFT_DEVICE = 0;
-pub const FFT_DEVICE_FFT_DEVICE_GPU: FFT_DEVICE = 1;
+pub const FFT_DEVICE_CPU: FFT_DEVICE = 0;
+pub const FFT_DEVICE_GPU: FFT_DEVICE = 1;
 pub type FFT_DEVICE = ::std::os::raw::c_int;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct FFTPlanConfig {
+    pub dim: i32,
+    pub shape: *const i32,
+    pub number_batches: i32,
+    pub sign: FFT_SIGN,
+    pub device: FFT_DEVICE,
+}
+#[test]
+fn bindgen_test_layout_FFTPlanConfig() {
+    assert_eq!(
+        ::std::mem::size_of::<FFTPlanConfig>(),
+        32usize,
+        concat!("Size of: ", stringify!(FFTPlanConfig))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<FFTPlanConfig>(),
+        8usize,
+        concat!("Alignment of ", stringify!(FFTPlanConfig))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<FFTPlanConfig>())).dim as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(FFTPlanConfig),
+            "::",
+            stringify!(dim)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<FFTPlanConfig>())).shape as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(FFTPlanConfig),
+            "::",
+            stringify!(shape)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<FFTPlanConfig>())).number_batches as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(FFTPlanConfig),
+            "::",
+            stringify!(number_batches)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<FFTPlanConfig>())).sign as *const _ as usize },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(FFTPlanConfig),
+            "::",
+            stringify!(sign)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<FFTPlanConfig>())).device as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(FFTPlanConfig),
+            "::",
+            stringify!(device)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct FFTPlanFloat {
+    pub config: FFTPlanConfig,
     pub ptr: *mut ::std::os::raw::c_void,
 }
 #[test]
 fn bindgen_test_layout_FFTPlanFloat() {
     assert_eq!(
         ::std::mem::size_of::<FFTPlanFloat>(),
-        8usize,
+        40usize,
         concat!("Size of: ", stringify!(FFTPlanFloat))
     );
     assert_eq!(
@@ -84,8 +157,18 @@ fn bindgen_test_layout_FFTPlanFloat() {
         concat!("Alignment of ", stringify!(FFTPlanFloat))
     );
     assert_eq!(
-        unsafe { &(*(::std::ptr::null::<FFTPlanFloat>())).ptr as *const _ as usize },
+        unsafe { &(*(::std::ptr::null::<FFTPlanFloat>())).config as *const _ as usize },
         0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(FFTPlanFloat),
+            "::",
+            stringify!(config)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<FFTPlanFloat>())).ptr as *const _ as usize },
+        32usize,
         concat!(
             "Offset of field: ",
             stringify!(FFTPlanFloat),
@@ -97,13 +180,14 @@ fn bindgen_test_layout_FFTPlanFloat() {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct FFTPlanDouble {
+    pub config: FFTPlanConfig,
     pub ptr: *mut ::std::os::raw::c_void,
 }
 #[test]
 fn bindgen_test_layout_FFTPlanDouble() {
     assert_eq!(
         ::std::mem::size_of::<FFTPlanDouble>(),
-        8usize,
+        40usize,
         concat!("Size of: ", stringify!(FFTPlanDouble))
     );
     assert_eq!(
@@ -112,8 +196,18 @@ fn bindgen_test_layout_FFTPlanDouble() {
         concat!("Alignment of ", stringify!(FFTPlanDouble))
     );
     assert_eq!(
-        unsafe { &(*(::std::ptr::null::<FFTPlanDouble>())).ptr as *const _ as usize },
+        unsafe { &(*(::std::ptr::null::<FFTPlanDouble>())).config as *const _ as usize },
         0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(FFTPlanDouble),
+            "::",
+            stringify!(config)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<FFTPlanDouble>())).ptr as *const _ as usize },
+        32usize,
         concat!(
             "Offset of field: ",
             stringify!(FFTPlanDouble),
@@ -125,13 +219,14 @@ fn bindgen_test_layout_FFTPlanDouble() {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct FFTPlanDoubleR2C {
+    pub config: FFTPlanConfig,
     pub ptr: *mut ::std::os::raw::c_void,
 }
 #[test]
 fn bindgen_test_layout_FFTPlanDoubleR2C() {
     assert_eq!(
         ::std::mem::size_of::<FFTPlanDoubleR2C>(),
-        8usize,
+        40usize,
         concat!("Size of: ", stringify!(FFTPlanDoubleR2C))
     );
     assert_eq!(
@@ -140,8 +235,18 @@ fn bindgen_test_layout_FFTPlanDoubleR2C() {
         concat!("Alignment of ", stringify!(FFTPlanDoubleR2C))
     );
     assert_eq!(
-        unsafe { &(*(::std::ptr::null::<FFTPlanDoubleR2C>())).ptr as *const _ as usize },
+        unsafe { &(*(::std::ptr::null::<FFTPlanDoubleR2C>())).config as *const _ as usize },
         0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(FFTPlanDoubleR2C),
+            "::",
+            stringify!(config)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<FFTPlanDoubleR2C>())).ptr as *const _ as usize },
+        32usize,
         concat!(
             "Offset of field: ",
             stringify!(FFTPlanDoubleR2C),
@@ -154,29 +259,27 @@ pub type ComplexF = [f32; 2usize];
 pub type ComplexD = [f64; 2usize];
 pub type ComplexL = [f32; 2usize];
 extern "C" {
-    pub fn fft_new_plan_float(
-        dim: i32,
-        shape: *const i32,
-        number_batches: i32,
-        sign: FFT_SIGN,
-        device: FFT_DEVICE,
+    pub fn fft_planf_init(
+        plan: *mut FFTPlanFloat,
         in_complex: *mut ComplexF,
         in_size: u64,
         out_complex: *mut ComplexF,
         out_size: u64,
-        err: *mut FFT_ERROR_CODE,
-    ) -> FFTPlanFloat;
+    ) -> FFT_ERROR_CODE;
 }
 extern "C" {
-    pub fn fft_plan_device_name(
-        plan: FFTPlanFloat,
+    pub fn fft_planf_device_name(
+        plan: *mut FFTPlanFloat,
         name: *mut ::std::os::raw::c_char,
         size: ::std::os::raw::c_int,
     ) -> FFT_ERROR_CODE;
 }
 extern "C" {
-    pub fn fft_close_plan(plan: FFTPlanFloat);
+    pub fn fft_close_planf(plan: *mut FFTPlanFloat);
 }
 extern "C" {
-    pub fn fft_execute(plan: FFTPlanFloat) -> FFT_ERROR_CODE;
+    pub fn fft_close_plan(plan: *mut FFTPlanDouble);
+}
+extern "C" {
+    pub fn fft_planf_execute(plan: *mut FFTPlanFloat) -> FFT_ERROR_CODE;
 }
