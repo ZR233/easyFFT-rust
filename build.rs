@@ -4,6 +4,7 @@ extern crate bindgen;
 use std::env;
 use std::env::var;
 use std::path::PathBuf;
+use std::fs;
 
 fn main(){
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
@@ -41,21 +42,51 @@ fn main(){
 
     use cmake::Config;
 
-    let dst = Config::new("easyFFT")
-        .build();
+    let mut cfg = Config::new("easyFFT");
 
-    let old_path = env::var("PATH").unwrap();
-    env::set_var("PATH", old_path + ";" + &*dst.join("bin").display().to_string());
+    let target_os = var("CARGO_CFG_TARGET_OS").unwrap();
+
+    if target_os == "android" {
+        let toolchain = var("CARGO_NDK_CMAKE_TOOLCHAIN_PATH").unwrap();
+        let android_platform = var("CARGO_NDK_ANDROID_PLATFORM").unwrap();
+        let android_abi = var("CARGO_NDK_ANDROID_TARGET").unwrap();
+        cfg.define("CMAKE_TOOLCHAIN_FILE", toolchain);
+        cfg.generator("Ninja");
+        cfg.define("ANDROID_PLATFORM", android_platform);
+        cfg.define("ANDROID_ABI", android_abi);
+    }
+
+    let dst = cfg.build();
+
 
     let vars = env::vars();
     for one in vars {
         println!("cargo:warning={}:{}", one.0, one.1);
     }
 
+
     println!("cargo:rustc-link-search={}", dst.join("bin").display());
     println!("cargo:rustc-link-search={}", dst.join("lib").display());
     println!("cargo:rustc-link-lib=easyFFT");
 
 
+    let deps = dst.parent().unwrap().parent().unwrap().parent().unwrap().join("deps");
+    println!("cargo:warning=DEPS_DIR:{}", deps.display());
+    let dyn_dir = dst.join("bin");
+
+
+
+    if cfg!(target_os = "windows") {
+        let main_dll = dyn_dir.join("easyFFT.dll");
+        copy_dyn(main_dll, deps.join("easyFFT.dll"));
+        copy_dyn(dyn_dir.join("libfftw3-3.dll"), deps.join("libfftw3-3.dll"));
+        copy_dyn(dyn_dir.join("libfftw3f-3.dll"), deps.join("libfftw3f-3.dll"));
+        copy_dyn(dyn_dir.join("libfftw3l-3.dll"), deps.join("libfftw3l-3.dll"));
+    }
+}
+
+
+fn copy_dyn(src: PathBuf, dst: PathBuf){
+    fs::copy(src, dst).unwrap();
 
 }
