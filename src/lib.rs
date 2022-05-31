@@ -5,7 +5,6 @@ extern crate ndarray;
 
 use std::any::Any;
 use std::ffi::c_void;
-use std::os::windows::process::CommandExt;
 use std::ptr::{null, null_mut};
 use ndarray::{Array, Array1, ArrayBase, ArrayD, Dimension, RawData};
 use num::{Complex, Num};

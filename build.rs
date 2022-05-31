@@ -67,21 +67,22 @@ fn main(){
 
     println!("cargo:rustc-link-search={}", dst.join("bin").display());
     println!("cargo:rustc-link-search={}", dst.join("lib").display());
-    println!("cargo:rustc-link-lib=easyFFT");
+
 
 
     let deps = dst.parent().unwrap().parent().unwrap().parent().unwrap().join("deps");
     println!("cargo:warning=DEPS_DIR:{}", deps.display());
     let dyn_dir = dst.join("bin");
 
-
-
-    if cfg!(target_os = "windows") {
+    if target_os == "windows" {
         let main_dll = dyn_dir.join("easyFFT.dll");
         copy_dyn(main_dll, deps.join("easyFFT.dll"));
         copy_dyn(dyn_dir.join("libfftw3-3.dll"), deps.join("libfftw3-3.dll"));
         copy_dyn(dyn_dir.join("libfftw3f-3.dll"), deps.join("libfftw3f-3.dll"));
         copy_dyn(dyn_dir.join("libfftw3l-3.dll"), deps.join("libfftw3l-3.dll"));
+        println!("cargo:rustc-link-lib=easyFFT");
+    }else {
+        println!("cargo:rustc-link-lib=easyFFT_static");
     }
 }
 
