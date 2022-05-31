@@ -16,5 +16,5 @@ ndarray = "0"
 ndarray-stats = "0"
 
 [build-dependencies]
-bindgen="*"
+bindgen="0"
 cmake = "0"
