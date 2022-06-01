@@ -1,11 +1,10 @@
 [package]
 name = "easy-fft"
-version = "0.0.1"
+version = "0.0.4"
 edition = "2021"
 links="easyFFT"
 
-[lib]
-name = "easy-fft"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 
