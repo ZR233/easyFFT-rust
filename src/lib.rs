@@ -25,6 +25,16 @@ pub struct Plan<T: Num+ Clone> {
     origin: Box<dyn OriginPlan> ,
 }
 
+pub enum Sign{
+    Forward,
+    Backward
+}
+pub enum Device{
+    CPU,
+    GPU
+}
+
+
 struct OriginPlanNotInit{
 }
 impl OriginPlan for OriginPlanNotInit{
@@ -54,12 +64,31 @@ impl Drop for OriginPlanFloat{
     }
 }
 
+impl Into<FFT_SIGN> for Sign {
+    fn into(self) -> FFT_SIGN {
+        match self {
+            Sign::Forward => FFT_SIGN_FORWARD,
+            Sign::Backward => FFT_SIGN_BACKWARD
+        }
+    }
+}
+impl Into<FFT_DEVICE> for Device {
+    fn into(self) -> FFT_SIGN {
+        match self {
+            Device::CPU => FFT_DEVICE_CPU,
+            Device::GPU => FFT_DEVICE_GPU
+        }
+    }
+}
+
+
+
 impl Plan<Complex32>{
     pub fn new_complex_float(
         shape: Vec<i32>,
         number_batches: usize,
-        sign: FFT_SIGN,
-        device: FFT_DEVICE,
+        sign: Sign,
+        device: Device,
     )->Result<Plan<Complex32>,Error>{
         let mut plan = Plan::new(
             shape, number_batches
@@ -70,8 +99,8 @@ impl Plan<Complex32>{
                     dim: plan.shape.len() as i32,
                     shape: plan.shape.as_ptr(),
                     number_batches: number_batches as i32,
-                    sign,
-                    device
+                    sign: sign.into(),
+                    device: device.into()
                 },
                 ptr: null_mut()
             };
@@ -139,7 +168,7 @@ mod tests {
     use ndarray::{array, Array, ShapeBuilder};
     use num::complex::Complex32;
     use crate::bindings::{FFT_SIGN_FORWARD, FFT_DEVICE_CPU};
-    use crate::Plan;
+    use crate::{Device, Plan, Sign};
     use ndarray::prelude::*;
     #[test]
     fn it_works() {
@@ -163,8 +192,8 @@ mod tests {
             let mut plan = Plan::new_complex_float(
                 vec![4],
                 2,
-                    FFT_SIGN_FORWARD,
-                    FFT_DEVICE_CPU,
+                    Sign::Forward,
+                    Device::CPU,
             ).unwrap();
 
 
