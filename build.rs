@@ -51,7 +51,7 @@ fn main(){
         cfg.generator("Ninja");
         cfg.define("ANDROID_PLATFORM", android_platform);
         cfg.define("ANDROID_ABI", android_abi);
-        cfg.define("ANDROID_STL", "c++_shared");
+        // cfg.define("ANDROID_STL", "c++_static");
     }
 
     let dst = cfg.build();
