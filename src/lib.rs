@@ -17,7 +17,7 @@ trait OriginPlan{
     unsafe fn execute(&mut self)->Result<(), Error>;
 }
 
-pub struct Plan<T: Num+ Clone> {
+pub struct Plan<T: Num+ Clone + Copy> {
     data_in: Vec<T>,
     pub data_out: Vec<T>,
     shape: Vec<i32>,
@@ -130,7 +130,7 @@ impl Plan<Complex32>{
 }
 
 
-impl<T:Num+ Clone> Plan<T> {
+impl<T:Num+ Clone + Copy> Plan<T> {
     fn new (
         shape: Vec<i32>,
         number_batches: usize,
