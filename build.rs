@@ -51,6 +51,7 @@ fn main(){
         cfg.generator("Ninja");
         cfg.define("ANDROID_PLATFORM", android_platform);
         cfg.define("ANDROID_ABI", android_abi);
+        cfg.define("ANDROID_STL", "c++_shared");
     }
 
     let dst = cfg.build();
@@ -79,7 +80,9 @@ fn main(){
         copy_dyn(dyn_dir.join("libfftw3l-3.dll"), deps.join("libfftw3l-3.dll"));
         println!("cargo:rustc-link-lib=easyFFT");
     }else {
+        println!("cargo:rustc-link-lib=c++_shared");
         println!("cargo:rustc-link-lib=static=easyFFT_static");
+
     }
 }
 
