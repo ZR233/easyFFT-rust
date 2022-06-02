@@ -19,7 +19,7 @@ trait OriginPlan{
 
 pub struct Plan<T: Num+ Clone> {
     data_in: Vec<T>,
-    data_out: Vec<T>,
+    pub data_out: Vec<T>,
     shape: Vec<i32>,
     number_batches: usize,
     origin: Box<dyn OriginPlan> ,
@@ -154,7 +154,9 @@ impl<T:Num+ Clone> Plan<T> {
             origin: Box::new(OriginPlanNotInit{}),
         }) 
     }
-
+    pub fn copy_in(&mut self, data: &[T]){
+        self.data_in.copy_from_slice(data);
+    }
 }
 
 
