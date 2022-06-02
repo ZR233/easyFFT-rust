@@ -71,6 +71,8 @@ fn main(){
     let deps = out_build_dir.join("deps");
     println!("cargo:warning=DEPS_DIR:{}", deps.display());
     let dyn_dir = dst.join("bin");
+    let lib_dir = dst.join("lib");
+
 
     if target_os == "windows" {
         let main_dll = dyn_dir.join("easyFFT.dll");
@@ -80,8 +82,8 @@ fn main(){
         copy_dyn(dyn_dir.join("libfftw3l-3.dll"), deps.join("libfftw3l-3.dll"));
         println!("cargo:rustc-link-lib=easyFFT");
     }else {
-        copy_dyn(dyn_dir.join("libeasyFFT.so"), deps.join("libeasyFFT.so"));
-        copy_dyn(dyn_dir.join("libeasyFFT.so"), out_build_dir.join("libeasyFFT.so"));
+        copy_dyn(lib_dir.join("libeasyFFT.so"), deps.join("libeasyFFT.so"));
+        copy_dyn(lib_dir.join("libeasyFFT.so"), out_build_dir.join("libeasyFFT.so"));
         println!("cargo:rustc-link-lib=easyFFT");
     }
 }
