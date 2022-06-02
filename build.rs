@@ -67,8 +67,8 @@ fn main(){
     println!("cargo:rustc-link-search={}", dst.join("lib").display());
 
 
-
-    let deps = dst.parent().unwrap().parent().unwrap().parent().unwrap().join("deps");
+    let out_build_dir = dst.parent().unwrap().parent().unwrap().parent().unwrap();
+    let deps = out_build_dir.join("deps");
     println!("cargo:warning=DEPS_DIR:{}", deps.display());
     let dyn_dir = dst.join("bin");
 
@@ -80,9 +80,9 @@ fn main(){
         copy_dyn(dyn_dir.join("libfftw3l-3.dll"), deps.join("libfftw3l-3.dll"));
         println!("cargo:rustc-link-lib=easyFFT");
     }else {
-        println!("cargo:rustc-link-lib=c++_shared");
-        println!("cargo:rustc-link-lib=static=easyFFT_static");
-
+        copy_dyn(dyn_dir.join("libeasyFFT.so"), deps.join("libeasyFFT.so"));
+        copy_dyn(dyn_dir.join("libeasyFFT.so"), out_build_dir.join("libeasyFFT.so"));
+        println!("cargo:rustc-link-lib=easyFFT");
     }
 }
 
