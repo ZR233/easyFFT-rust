@@ -10,9 +10,6 @@ fn main(){
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let header =  root
         .join("easyFFT").join("src").join("include").join("easyFFT.h");
-    // Tell cargo to tell rustc to link the system bzip2
-    // shared library.
-    println!("cargo:rustc-link-lib=easyFFT");
 
     // Tell cargo to invalidate the built crate whenever the wrapper changes
     println!("cargo:rerun-if-changed={}", header.display());
@@ -85,7 +82,6 @@ fn main(){
         println!("cargo:rustc-link-lib=easyFFT_static");
     }
 }
-
 
 fn copy_dyn(src: PathBuf, dst: PathBuf){
     fs::copy(src, dst).unwrap();
