@@ -79,7 +79,7 @@ fn main(){
         copy_dyn(dyn_dir.join("libfftw3l-3.dll"), deps.join("libfftw3l-3.dll"));
         println!("cargo:rustc-link-lib=easyFFT");
     }else {
-        println!("cargo:rustc-link-lib=easyFFT_static");
+        println!("cargo:rustc-link-lib=static=easyFFT_static");
     }
 }
 
