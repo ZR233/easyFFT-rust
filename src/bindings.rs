@@ -53,12 +53,15 @@ pub type uint_fast64_t = ::std::os::raw::c_ulonglong;
 pub type intmax_t = ::std::os::raw::c_longlong;
 pub type uintmax_t = ::std::os::raw::c_ulonglong;
 pub const FFT_ERROR_CODE_OK: FFT_ERROR_CODE = 0;
-pub const FFT_ERROR_CODE_IN_SIZE: FFT_ERROR_CODE = 1;
-pub const FFT_ERROR_CODE_OUT_SIZE: FFT_ERROR_CODE = 2;
-pub const FFT_ERROR_CODE_CL: FFT_ERROR_CODE = 3;
-pub const FFT_ERROR_CODE_DIM_TOO_BIG: FFT_ERROR_CODE = 4;
-pub const FFT_ERROR_CODE_NO_CL_DEVICE: FFT_ERROR_CODE = 5;
-pub const FFT_ERROR_CODE_VKFFT: FFT_ERROR_CODE = 6;
+pub const FFT_ERROR_CODE_OPEN_CL: FFT_ERROR_CODE = 1;
+pub const FFT_ERROR_CODE_VULKAN: FFT_ERROR_CODE = 2;
+pub const FFT_ERROR_CODE_VKFFT: FFT_ERROR_CODE = 3;
+pub const FFT_ERROR_CODE_IN_SIZE: FFT_ERROR_CODE = 4;
+pub const FFT_ERROR_CODE_OUT_SIZE: FFT_ERROR_CODE = 5;
+pub const FFT_ERROR_CODE_DIM_TOO_BIG: FFT_ERROR_CODE = 6;
+pub const FFT_ERROR_CODE_DEVICE_NOT_FOUND: FFT_ERROR_CODE = 7;
+pub const FFT_ERROR_CODE_MALLOC_FAILED: FFT_ERROR_CODE = 8;
+pub const FFT_ERROR_CODE_OUT_OF_DEVICE_MEMORY: FFT_ERROR_CODE = 9;
 pub type FFT_ERROR_CODE = ::std::os::raw::c_int;
 pub const FFT_SIGN_FORWARD: FFT_SIGN = 0;
 pub const FFT_SIGN_BACKWARD: FFT_SIGN = 1;
@@ -257,7 +260,6 @@ fn bindgen_test_layout_FFTPlanDoubleR2C() {
 }
 pub type ComplexF = [f32; 2usize];
 pub type ComplexD = [f64; 2usize];
-pub type ComplexL = [f32; 2usize];
 extern "C" {
     pub fn fft_planf_init(
         plan: *mut FFTPlanFloat,
