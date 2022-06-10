@@ -5,7 +5,6 @@ extern crate ndarray;
 
 use std::any::Any;
 use std::ffi::c_void;
-use std::os::windows::process::CommandExt;
 use std::ptr::{null, null_mut};
 use ndarray::{Array, Array1, ArrayBase, ArrayD, Dimension, RawData};
 use num::{Complex, Num};
@@ -18,13 +17,23 @@ trait OriginPlan{
     unsafe fn execute(&mut self)->Result<(), Error>;
 }
 
-pub struct Plan<T: Num+ Clone> {
+pub struct Plan<T: Num+ Clone + Copy> {
     data_in: Vec<T>,
-    data_out: Vec<T>,
+    pub data_out: Vec<T>,
     shape: Vec<i32>,
     number_batches: usize,
     origin: Box<dyn OriginPlan> ,
 }
+
+pub enum Sign{
+    Forward,
+    Backward
+}
+pub enum Device{
+    CPU,
+    GPU
+}
+
 
 struct OriginPlanNotInit{
 }
@@ -55,12 +64,31 @@ impl Drop for OriginPlanFloat{
     }
 }
 
+impl Into<FFT_SIGN> for Sign {
+    fn into(self) -> FFT_SIGN {
+        match self {
+            Sign::Forward => FFT_SIGN_FORWARD,
+            Sign::Backward => FFT_SIGN_BACKWARD
+        }
+    }
+}
+impl Into<FFT_DEVICE> for Device {
+    fn into(self) -> FFT_SIGN {
+        match self {
+            Device::CPU => FFT_DEVICE_CPU,
+            Device::GPU => FFT_DEVICE_GPU
+        }
+    }
+}
+
+
+
 impl Plan<Complex32>{
     pub fn new_complex_float(
         shape: Vec<i32>,
         number_batches: usize,
-        sign: FFT_SIGN,
-        device: FFT_DEVICE,
+        sign: Sign,
+        device: Device,
     )->Result<Plan<Complex32>,Error>{
         let mut plan = Plan::new(
             shape, number_batches
@@ -71,8 +99,8 @@ impl Plan<Complex32>{
                     dim: plan.shape.len() as i32,
                     shape: plan.shape.as_ptr(),
                     number_batches: number_batches as i32,
-                    sign,
-                    device
+                    sign: sign.into(),
+                    device: device.into()
                 },
                 ptr: null_mut()
             };
@@ -102,7 +130,7 @@ impl Plan<Complex32>{
 }
 
 
-impl<T:Num+ Clone> Plan<T> {
+impl<T:Num+ Clone + Copy> Plan<T> {
     fn new (
         shape: Vec<i32>,
         number_batches: usize,
@@ -126,7 +154,9 @@ impl<T:Num+ Clone> Plan<T> {
             origin: Box::new(OriginPlanNotInit{}),
         }) 
     }
-
+    pub fn copy_in(&mut self, data: &[T]){
+        self.data_in.copy_from_slice(data);
+    }
 }
 
 
@@ -140,7 +170,7 @@ mod tests {
     use ndarray::{array, Array, ShapeBuilder};
     use num::complex::Complex32;
     use crate::bindings::{FFT_SIGN_FORWARD, FFT_DEVICE_CPU};
-    use crate::Plan;
+    use crate::{Device, Plan, Sign};
     use ndarray::prelude::*;
     #[test]
     fn it_works() {
@@ -164,8 +194,8 @@ mod tests {
             let mut plan = Plan::new_complex_float(
                 vec![4],
                 2,
-                    FFT_SIGN_FORWARD,
-                    FFT_DEVICE_CPU,
+                    Sign::Forward,
+                    Device::CPU,
             ).unwrap();
 
 

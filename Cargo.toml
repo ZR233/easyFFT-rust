@@ -1,13 +1,13 @@
 [package]
-name = "easyFFT-rust"
-version = "0.1.0"
+name = "easyfft"
+version = "0.0.16"
 edition = "2021"
-
+links="easyFFT"
 
 [lib]
-name = "easy_fft_rust"
-crate-type = ["cdylib"]
+name="easyfft_binding"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 
 [dependencies]
 num="0"
@@ -15,5 +15,5 @@ ndarray = "0"
 ndarray-stats = "0"
 
 [build-dependencies]
-bindgen="*"
+bindgen="0"
 cmake = "0"
