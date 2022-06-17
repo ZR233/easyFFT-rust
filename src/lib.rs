@@ -9,12 +9,14 @@ use std::ptr::{null, null_mut};
 use ndarray::{Array, Array1, ArrayBase, ArrayD, Dimension, RawData};
 use num::{Complex, Num};
 use num::complex::Complex32;
-use crate::bindings::*;
-pub use error::Error;
+pub use error::Result;
 use error::handle_origin_err;
+pub use error::Error;
+
+
 
 trait OriginPlan{
-    unsafe fn execute(&mut self)->Result<(), Error>;
+    unsafe fn execute(&mut self)->Result<()>;
 }
 
 pub struct Plan<T: Num+ Clone + Copy> {
@@ -35,23 +37,28 @@ pub enum Device{
 }
 
 
-struct OriginPlanNotInit{
-}
+struct OriginPlanNotInit{}
+
 impl OriginPlan for OriginPlanNotInit{
-    unsafe fn execute(&mut self)->Result<(), Error> {
+    unsafe fn execute(&mut self)->Result<()> {
         Err(Error::NotInit)
     }
 }
 
 
 struct OriginPlanFloat{
-    ptr: FFTPlanFloat
+    ptr: bindings::FFTPlanFloat
 }
 
 impl OriginPlan for OriginPlanFloat{
-    unsafe fn execute(&mut self)->Result<(), Error> {
-        let err = fft_planf_execute((&mut self.ptr) as *mut FFTPlanFloat);
-        handle_origin_err(err)
+    unsafe fn execute(&mut self)->Result<()> {
+        let result = bindings::fft_new_result();
+        bindings::fft_planf_execute(
+            (&mut self.ptr) as *mut bindings::FFTPlanFloat,
+            result);
+        let r = handle_origin_err(result);
+        bindings::fft_release_result(result);
+        r
     }
 }
 
@@ -59,24 +66,24 @@ impl OriginPlan for OriginPlanFloat{
 impl Drop for OriginPlanFloat{
     fn drop(&mut self) {
         unsafe {
-            fft_close_planf((&mut self.ptr) as *mut FFTPlanFloat);
+            bindings::fft_close_planf((&mut self.ptr) as *mut bindings::FFTPlanFloat);
         }
     }
 }
 
-impl Into<FFT_SIGN> for Sign {
-    fn into(self) -> FFT_SIGN {
+impl Into<bindings::FFT_SIGN> for Sign {
+    fn into(self) -> bindings::FFT_SIGN {
         match self {
-            Sign::Forward => FFT_SIGN_FORWARD,
-            Sign::Backward => FFT_SIGN_BACKWARD
+            Sign::Forward => bindings::FFT_SIGN_FORWARD,
+            Sign::Backward => bindings::FFT_SIGN_BACKWARD
         }
     }
 }
-impl Into<FFT_DEVICE> for Device {
-    fn into(self) -> FFT_SIGN {
+impl Into<bindings::FFT_DEVICE> for Device {
+    fn into(self) -> bindings::FFT_SIGN {
         match self {
-            Device::CPU => FFT_DEVICE_CPU,
-            Device::GPU => FFT_DEVICE_GPU
+            Device::CPU => bindings::FFT_DEVICE_CPU,
+            Device::GPU => bindings::FFT_DEVICE_GPU
         }
     }
 }
@@ -89,13 +96,13 @@ impl Plan<Complex32>{
         number_batches: usize,
         sign: Sign,
         device: Device,
-    )->Result<Plan<Complex32>,Error>{
+    )->Result<Plan<Complex32>>{
         let mut plan = Plan::new(
             shape, number_batches
         )?;
         unsafe {
-            let mut plan_origin = FFTPlanFloat{
-                config: FFTPlanConfig {
+            let mut plan_origin = bindings::FFTPlanFloat{
+                config: bindings::FFTPlanConfig {
                     dim: plan.shape.len() as i32,
                     shape: plan.shape.as_ptr(),
                     number_batches: number_batches as i32,
@@ -104,15 +111,18 @@ impl Plan<Complex32>{
                 },
                 ptr: null_mut()
             };
-
-            let err = fft_planf_init(
-                (&mut plan_origin ) as *mut FFTPlanFloat,
+            let result = bindings::fft_new_result();
+            bindings::fft_planf_init(
+                (&mut plan_origin ) as *mut bindings::FFTPlanFloat,
                 plan.data_in.as_mut_ptr() as *mut [f32; 2],
                 plan.data_in.len() as u64,
                 plan.data_out.as_mut_ptr() as *mut [f32; 2],
                 plan.data_out.len() as u64,
+                result
             );
-            handle_origin_err(err)?;
+            let r = handle_origin_err(result);
+            bindings::fft_release_result(result);
+            r?;
             plan.origin = Box::new(OriginPlanFloat{
                 ptr: plan_origin
             });
@@ -121,8 +131,7 @@ impl Plan<Complex32>{
         Ok(plan)
     }
 
-    pub fn execute(&mut self) ->Result<(), Error>{
-
+    pub fn execute(&mut self) ->Result<()>{
         unsafe {
             self.origin.execute()
         }
@@ -134,7 +143,7 @@ impl<T:Num+ Clone + Copy> Plan<T> {
     fn new (
         shape: Vec<i32>,
         number_batches: usize,
-    ) -> Result<Plan<T>, Error> {
+    ) -> Result<Plan<T>> {
         let mut data_in = Vec::new();
         let mut data_out = Vec::new();
         let mut size = number_batches;
@@ -176,26 +185,11 @@ mod tests {
     fn it_works() {
         let mut out1;
         {
-            // let mut  a =
-            //     Array::<Complex32, _>::ones((2, 4));
-            //
-            //
-            // let mut b =
-            //     Array::<Complex32, _>::ones((2, 4));
-            // println!("1");
-            // let plan = Plan::new_complex_float(
-            //     FFT_SIGN_FFT_SIGN_FORWARD,
-            //     FFT_DEVICE_FFT_DEVICE_CPU,
-            //     &mut a,
-            //     &mut b,
-            // );
-            // println!("2");
-
             let mut plan = Plan::new_complex_float(
                 vec![4],
                 2,
                     Sign::Forward,
-                    Device::CPU,
+                    Device::GPU,
             ).unwrap();
 
 
@@ -210,7 +204,7 @@ mod tests {
             }
 
             println!("3");
-            plan.execute();
+            plan.execute().expect("execute fail");
             println!("4");
             let out = plan.data_out.clone();
 
@@ -218,9 +212,6 @@ mod tests {
 
             out1 = plan.data_out.clone();
         }
-
-
-
 
         assert_eq!(out1,  vec![
             Complex32::new(6.0, -6.0), Complex32::new(0.0, 4.0), Complex32::new(-2.0, 2.0), Complex32::new(-4.0, 0.0),

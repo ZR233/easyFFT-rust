@@ -45,7 +45,7 @@ fn main(){
 
     let target_os = var("CARGO_CFG_TARGET_OS").unwrap();
 
-    if target_os.matches("linux")  {
+    if target_os.contains("linux")  {
         cfg.generator("Ninja");
     }
 
@@ -59,7 +59,7 @@ fn main(){
         cfg.define("ANDROID_ABI", android_abi);
         // cfg.define("ANDROID_STL", "c++_static");
     }
-
+    cfg.define("BUILD_TESTS", "OFF");
     let dst = cfg.build();
 
     let out_build_dir = dst.parent().unwrap().parent().unwrap().parent().unwrap();

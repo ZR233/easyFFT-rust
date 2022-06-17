@@ -1,6 +1,6 @@
 [package]
 name = "easyfft"
-version = "0.0.16"
+version = "0.0.17"
 edition = "2021"
 links="easyFFT"
 
@@ -13,6 +13,7 @@ name="easyfft_binding"
 num="0"
 ndarray = "0"
 ndarray-stats = "0"
+libc = "0"
 
 [build-dependencies]
 bindgen="0"
