@@ -41,7 +41,7 @@ fn main(){
 
     let mut cfg = Config::new("easyFFT");
     cfg.profile("Release");
-
+    cfg.define("CMAKE_INSTALL_PREFIX", out_path);
 
     let target_os = var("CARGO_CFG_TARGET_OS").unwrap();
 

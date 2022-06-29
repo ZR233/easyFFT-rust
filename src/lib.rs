@@ -47,14 +47,14 @@ impl OriginPlan for OriginPlanNotInit{
 
 
 struct OriginPlanFloat{
-    ptr: bindings::FFTPlanFloat
+    ptr :  *mut bindings::FFTPlanFloat
 }
 
 impl OriginPlan for OriginPlanFloat{
     unsafe fn execute(&mut self)->Result<()> {
         let result = bindings::fft_new_result();
         bindings::fft_planf_execute(
-            (&mut self.ptr) as *mut bindings::FFTPlanFloat,
+            self.ptr,
             result);
         let r = handle_origin_err(result);
         bindings::fft_release_result(result);
@@ -66,7 +66,7 @@ impl OriginPlan for OriginPlanFloat{
 impl Drop for OriginPlanFloat{
     fn drop(&mut self) {
         unsafe {
-            bindings::fft_close_planf((&mut self.ptr) as *mut bindings::FFTPlanFloat);
+            bindings::fft_close_planf(self.ptr);
         }
     }
 }
@@ -101,19 +101,17 @@ impl Plan<Complex32>{
             shape, number_batches
         )?;
         unsafe {
-            let mut plan_origin = bindings::FFTPlanFloat{
-                config: bindings::FFTPlanConfig {
-                    dim: plan.shape.len() as i32,
-                    shape: plan.shape.as_ptr(),
-                    number_batches: number_batches as i32,
-                    sign: sign.into(),
-                    device: device.into()
-                },
-                ptr: null_mut()
+            let config = bindings::FFTPlanConfig {
+                dim: plan.shape.len() as i32,
+                shape: plan.shape.as_ptr(),
+                number_batches: number_batches as i32,
+                sign: sign.into(),
+                device: device.into()
             };
+
             let result = bindings::fft_new_result();
-            bindings::fft_planf_init(
-                (&mut plan_origin ) as *mut bindings::FFTPlanFloat,
+            let mut plan_origin = bindings::fft_planf_init(
+                config,
                 plan.data_in.as_mut_ptr() as *mut [f32; 2],
                 plan.data_in.len() as u64,
                 plan.data_out.as_mut_ptr() as *mut [f32; 2],
