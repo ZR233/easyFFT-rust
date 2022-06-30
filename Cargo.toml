@@ -1,6 +1,6 @@
 [package]
 name = "easyfft"
-version = "0.0.16"
+version = "0.0.20"
 edition = "2021"
 links="easyFFT"
 
@@ -8,11 +8,20 @@ links="easyFFT"
 name="easyfft_binding"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+cl = []
 
 [dependencies]
 num="0"
-ndarray = "0"
-ndarray-stats = "0"
+libc = "0"
+
+[dev-dependencies]
+rand = "*"
+criterion = "0.3"
+
+[[bench]]
+name = "benchmark_fft"
+harness = false
 
 [build-dependencies]
 bindgen="0"

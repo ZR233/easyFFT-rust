@@ -2,10 +2,10 @@
 <project version="4">
   <component name="RemoteTargetsManager">
     <targets>
-      <target name="zr@localhost:22" type="ssh/sftp" uuid="6abee747-9758-432d-898d-aec356a50799">
+      <target name="zr@192.168.0.3:22" type="ssh/sftp" uuid="882ff32b-799a-4dbf-abd3-e0fb77d7737a">
         <config>
           <option name="projectRootOnTarget" value="/home/zr/easyFFT-rust" />
-          <option name="serverName" value="zr@localhost:22 password" />
+          <option name="serverName" value="zr@192.168.0.3:22 password" />
         </config>
         <ContributedStateBase type="RsLanguageRuntime">
           <config>
