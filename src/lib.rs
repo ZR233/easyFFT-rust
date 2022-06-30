@@ -3,8 +3,10 @@ mod error;
 extern crate num;
 
 use std::any::Any;
-use std::ffi::c_void;
+use std::ffi::{c_void, CStr, CString};
+use std::os::raw::c_char;
 use std::ptr::{null, null_mut};
+use libc::c_int;
 use num::{Complex, Num};
 use num::complex::Complex32;
 pub use error::Result;
@@ -15,6 +17,7 @@ pub use error::Error;
 
 trait OriginPlan{
     unsafe fn execute(&mut self)->Result<()>;
+    unsafe fn device_name(&mut self)->Result<String>;
 }
 
 pub struct Plan<T: Num+ Clone + Copy> {
@@ -41,6 +44,8 @@ impl OriginPlan for OriginPlanNotInit{
     unsafe fn execute(&mut self)->Result<()> {
         Err(Error::NotInit)
     }
+
+    unsafe fn device_name(&mut self) -> Result<String> {  Err(Error::NotInit) }
 }
 
 
@@ -57,6 +62,15 @@ impl OriginPlan for OriginPlanFloat{
         let r = handle_origin_err(result);
         bindings::fft_release_result(result);
         r
+    }
+
+    unsafe fn device_name(&mut self) -> Result<String> {
+        let mut buffer:Vec<c_char> = Vec::with_capacity(100);
+        let result = bindings::fft_new_result();
+        bindings::fft_planf_device_name(self.ptr, buffer.as_mut_ptr(), 100 as c_int, result);
+        let cstr= CStr::from_ptr(buffer.as_mut_ptr());
+        let str = cstr.to_str().unwrap();
+        Ok( String::from(str))
     }
 }
 
@@ -132,6 +146,11 @@ impl Plan<Complex32>{
             self.origin.execute()
         }
     }
+    pub fn device_name(&mut self)->Result<String>{
+        unsafe {
+            self.origin.device_name()
+        }
+    }
 }
 
 
@@ -197,8 +216,8 @@ mod tests {
                     plan.data_in[i] = Complex32::new(-t, t);
                 }
             }
-
-            println!("3");
+            let name = plan.device_name().unwrap();
+            println!("{}", name);
             plan.execute().expect("execute fail");
             println!("4");
             let out = plan.data_out.clone();

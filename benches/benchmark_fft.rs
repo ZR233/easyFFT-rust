@@ -27,8 +27,8 @@ fn create_sample(shape: Vec<i32>,
 
 
 pub fn criterion_benchmark(c: &mut Criterion) {
-    let shape = vec![65536];
-    let batches = 500;
+    let shape = vec![512];
+    let batches = 10000;
     let sample = create_sample(shape.clone(), batches);
 
     let mut plan_gpu = Plan::new_complex_float(
@@ -48,10 +48,11 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         plan_cpu.data_in[i] = sample[i].clone();
         plan_gpu.data_in[i] = sample[i].clone();
     }
+    let cpu_name= plan_cpu.device_name().unwrap();
+    let gpu_name = plan_gpu.device_name().unwrap();
 
-
-    c.bench_function("cpu", |b| b.iter(|| plan_cpu.execute().unwrap() ));
-    c.bench_function("gpu", |b| b.iter(|| plan_gpu.execute().unwrap() ));
+    c.bench_function(cpu_name.as_str(), |b| b.iter(|| plan_cpu.execute().unwrap() ));
+    c.bench_function(gpu_name.as_str(), |b| b.iter(|| plan_gpu.execute().unwrap() ));
 
 }
 

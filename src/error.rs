@@ -4,6 +4,7 @@ use crate::bindings;
 use std::error::Error as StdError;
 use std::ffi::CStr;
 use std::result::Result as StdResult;
+use std::str::Utf8Error;
 
 /// A result of a function that may return a `Error`.
 pub type Result<T> = StdResult<T, Error>;
@@ -51,7 +52,6 @@ impl Display for Error {
         f.write_str(self.strerror().as_str())
     }
 }
-
 
 
 pub unsafe fn handle_origin_err(result: *const  bindings::Result) ->Result<()>{
