@@ -43,6 +43,15 @@ fn main(){
     cfg.profile("Release");
     cfg.define("CMAKE_INSTALL_PREFIX", out_path);
 
+    cfg.define("ENABLE_CL", "OFF");
+
+    let enable_cl = env::var_os("CARGO_FEATURE_CL").is_some();
+    if enable_cl{
+        println!("cargo:waning=enable cl" );
+        cfg.define("ENABLE_CL", "ON");
+    }
+
+
     let target_os = var("CARGO_CFG_TARGET_OS").unwrap();
 
     if target_os.contains("linux")  {

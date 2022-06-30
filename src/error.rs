@@ -22,6 +22,7 @@ pub enum Error{
     Vulkan(String),
     MallocFailed,
     OutOfDeviceMemory,
+    NotSupportCL,
 }
 
 
@@ -40,6 +41,7 @@ impl Error {
             Error::Vulkan(msg)         => String::from("VULKAN Error ") + msg,
             Error::MallocFailed => String::from("malloc failed"),
             Error::OutOfDeviceMemory => String::from("out of device memory"),
+            Error::NotSupportCL => String::from("not support cl"),
         }
     }
 }
@@ -68,6 +70,7 @@ pub unsafe fn handle_origin_err(result: *const  bindings::Result) ->Result<()>{
         bindings::FFT_ERROR_CODE_DEVICE_NOT_FOUND=> Err(Error::DeviceNotFound) ,
         bindings::FFT_ERROR_CODE_MALLOC_FAILED=> Err(Error::MallocFailed) ,
         bindings::FFT_ERROR_CODE_OUT_OF_DEVICE_MEMORY=> Err(Error::OutOfDeviceMemory) ,
+        bindings::FFT_ERROR_CODE_NOT_SUPPORT_CL=> Err(Error::NotSupportCL) ,
         _ => Err(Error::Unknown)
     }
 

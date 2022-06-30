@@ -1,12 +1,10 @@
 mod bindings;
 mod error;
 extern crate num;
-extern crate ndarray;
 
 use std::any::Any;
 use std::ffi::c_void;
 use std::ptr::{null, null_mut};
-use ndarray::{Array, Array1, ArrayBase, ArrayD, Dimension, RawData};
 use num::{Complex, Num};
 use num::complex::Complex32;
 pub use error::Result;
@@ -20,7 +18,7 @@ trait OriginPlan{
 }
 
 pub struct Plan<T: Num+ Clone + Copy> {
-    data_in: Vec<T>,
+    pub data_in: Vec<T>,
     pub data_out: Vec<T>,
     shape: Vec<i32>,
     number_batches: usize,
@@ -174,11 +172,10 @@ impl<T:Num+ Clone + Copy> Plan<T> {
 #[cfg(test)]
 mod tests {
     use std::fmt::Debug;
-    use ndarray::{array, Array, ShapeBuilder};
+
     use num::complex::Complex32;
     use crate::bindings::{FFT_SIGN_FORWARD, FFT_DEVICE_CPU};
     use crate::{Device, Plan, Sign};
-    use ndarray::prelude::*;
     #[test]
     fn it_works() {
         let mut out1;
@@ -215,7 +212,6 @@ mod tests {
             Complex32::new(6.0, -6.0), Complex32::new(0.0, 4.0), Complex32::new(-2.0, 2.0), Complex32::new(-4.0, 0.0),
             Complex32::new(-22.0, 22.0), Complex32::new(0.0, -4.0), Complex32::new(2.0, -2.0), Complex32::new(4.0, 0.0)
         ]);
-
-
     }
+
 }
