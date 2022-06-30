@@ -27,8 +27,8 @@ fn create_sample(shape: Vec<i32>,
 
 
 pub fn criterion_benchmark(c: &mut Criterion) {
-    let shape = vec![512];
-    let batches = 5000;
+    let shape = vec![65536];
+    let batches = 500;
     let sample = create_sample(shape.clone(), batches);
 
     let mut plan_gpu = Plan::new_complex_float(
