@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <targets>
+      <target name="zr@localhost:22" type="ssh/sftp" uuid="6abee747-9758-432d-898d-aec356a50799">
+        <config>
+          <option name="projectRootOnTarget" value="/home/zr/easyFFT-rust" />
+          <option name="serverName" value="zr@localhost:22 password" />
+        </config>
+        <ContributedStateBase type="RsLanguageRuntime">
+          <config>
+            <option name="cargoPath" value="/home/zr/.cargo/bin/cargo" />
+            <option name="cargoVersion" value="1.61.0 (a028ae4 2022-04-29)" />
+            <option name="rustcPath" value="/home/zr/.cargo/bin/rustc" />
+            <option name="rustcVersion" value="1.61.0 (fe5b13d68 2022-05-18)" />
+          </config>
+        </ContributedStateBase>
+      </target>
+    </targets>
+  </component>
+</project>
